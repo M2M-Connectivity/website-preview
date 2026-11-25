@@ -5,7 +5,7 @@ let payload;const slot='au-connectivity-preview-session-v1';
 form.addEventListener('submit',async event=>{
  event.preventDefault();form.querySelector('button').disabled=true;statusLine.textContent='Opening preview…';
  try{
-  if(!payload){const res=await fetch('preview.bin');if(!res.ok)throw Error('load');payload=new Uint8Array(await res.arrayBuffer());}
+  if(!payload){const res=await fetch('preview.bin',{cache:'no-cache'});if(!res.ok)throw Error('load');payload=new Uint8Array(await res.arrayBuffer());}
   let key;const cached=sessionStorage.getItem(slot);if(!field.value && cached){key=await crypto.subtle.importKey('raw',Uint8Array.from(atob(cached),c=>c.charCodeAt(0)),'AES-GCM',false,['decrypt']);}else{const material=await crypto.subtle.importKey('raw',new TextEncoder().encode(field.value),'PBKDF2',false,['deriveKey']);
   key=await crypto.subtle.deriveKey({name:'PBKDF2',salt:payload.slice(0,16),iterations:600000,hash:'SHA-256'},material,{name:'AES-GCM',length:256},true,['decrypt']);}
   const bytes=await crypto.subtle.decrypt({name:'AES-GCM',iv:payload.slice(16,28)},key,payload.subarray(28));
